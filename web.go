@@ -30,6 +30,10 @@ func PageHandler(w http.ResponseWriter, r *http.Request) {
 	path, _ := mux.CurrentRoute(r).GetPathTemplate()
 	path = strings.TrimLeft(path, "/")
 
+	if path == "" {
+		path = "home"
+	}
+
 	fileName := "public/" + path + ".html"
 	log.Print("PageHandler:", fileName)
 
