@@ -62,7 +62,7 @@ func main() {
 	r.HandleFunc("/contacts", PageHandler)
 
 	b := r.PathPrefix("/blog").Subrouter()
-	b.HandleFunc("/", BlogHandler)
+	b.HandleFunc("", BlogHandler)
 	b.HandleFunc("/{slug}", BlogHandler)
 
 	r.NotFoundHandler = http.HandlerFunc(NotFoundHandler)
