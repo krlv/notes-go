@@ -6,6 +6,7 @@ import (
 	"log"
 	"strings"
 	"net/url"
+	"text/template"
 )
 
 const (
@@ -22,6 +23,8 @@ func getRoutePath(r *http.Request) (*url.URL, error) {
 			pairs = append(pairs, key, value)
 		}
 	}
+
+	log.Println(pairs)
 
 	return mux.CurrentRoute(r).URLPath(pairs...)
 }
@@ -42,11 +45,13 @@ func PageHandler(w http.ResponseWriter, r *http.Request) {
 
 func BlogHandler(w http.ResponseWriter, r *http.Request) {
 	path, _ := getRoutePath(r)
-
-	fileName := "public/blog.html"
 	log.Print("BlogHandler:", path)
 
-	http.ServeFile(w, r, fileName)
+	slug := mux.Vars(r)["slug"]
+	slug = strings.Title(slug)
+
+	t, _ := template.ParseFiles("templates/blog.html")
+	t.Execute(w, map[string]interface{}{ "Title": slug })
 }
 
 func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
