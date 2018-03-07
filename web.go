@@ -24,8 +24,6 @@ func getRoutePath(r *http.Request) (*url.URL, error) {
 		}
 	}
 
-	log.Println(pairs)
-
 	return mux.CurrentRoute(r).URLPath(pairs...)
 }
 
@@ -55,10 +53,11 @@ func BlogHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
-	fileName := "public/404.html"
 	log.Print("NotFoundHandler:", r.RequestURI)
+	path := strings.TrimLeft(r.RequestURI, "/")
 
-	http.ServeFile(w, r, fileName)
+	t, _ := template.ParseFiles("templates/404.html")
+	t.Execute(w, map[string]interface{}{ "Path": path })
 }
 
 func main() {
