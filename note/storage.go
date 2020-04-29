@@ -21,17 +21,17 @@ func NewStorage() Storage {
 
 	notes := make(map[int]Note, maxNotes)
 	for i := 0; i < maxNotes; i++ {
-		n := new(Note)
-
-		n.Title = fake.Sentence()
-		n.Body = fake.Paragraphs()
-
-		n.Tags = make([]string, rand.Intn(maxTags))
-		for j := 0; j < cap(n.Tags); j++ {
-			n.Tags[j] = fake.Word()
+		tags := make([]string, rand.Intn(maxTags))
+		for j := 0; j < cap(tags); j++ {
+			tags[j] = fake.Word()
 		}
 
-		notes[i] = *n
+		notes[i] = Note{
+			ID: i,
+			Title: fake.Sentence(),
+			Body: fake.Paragraphs(),
+			Tags: tags,
+		}
 	}
 
 	return MemoryStorage{
@@ -46,7 +46,13 @@ type MemoryStorage struct {
 
 // FindNotes returns notes from memory repository
 func (s MemoryStorage) FindNotes() []Note {
-	return []Note{}
+	notes := make([]Note, 0, len(s.notes))
+
+	for _, page := range s.notes {
+		notes = append(notes, page)
+	}
+
+	return notes
 }
 
 // GetNoteByID returns note by ID or error if note not found in memory repo

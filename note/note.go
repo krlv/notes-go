@@ -2,7 +2,7 @@ package note
 
 // Note entity
 type Note struct {
-	Id    int
+	ID    int
 	Title string
 	Body  string
 	Tags  []string

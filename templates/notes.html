@@ -5,6 +5,11 @@
     <title>Notes</title>
 </head>
 <body>
-    <h1>Notes {{.Title}}</h1>
+<h1>Notes</h1>
+<ul>
+    {{range .}}
+        <li><a href="/notes/{{.ID}}">{{.Title}}</a></li>
+    {{end}}
+</ul>
 </body>
 </html>
