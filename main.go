@@ -1,16 +1,14 @@
 package main
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/icrowley/fake"
-	"github.com/krlv/goweb/entity"
 	"log"
-	"math/rand"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 	"text/template"
+
+	"github.com/gorilla/mux"
+	"github.com/krlv/goweb/note"
 )
 
 const (
@@ -45,34 +43,6 @@ func PageHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, fileName)
 }
 
-func NotesHandler(w http.ResponseWriter, r *http.Request) {
-	path, _ := getRoutePath(r)
-	log.Print("NotesHandler:", path)
-
-	notes := make([]entity.Note, 2)
-	for i := 0; i < cap(notes); i++ {
-		note := new(entity.Note)
-		note.Title = fake.Sentence()
-		note.Body = fake.Paragraphs()
-
-		note.Tags = make([]string, rand.Intn(3))
-		for j := 0; j < cap(note.Tags); j++ {
-			note.Tags[j] = fake.Word()
-		}
-
-		notes[i] = *note
-	}
-
-	id, _ := strconv.Atoi(mux.Vars(r)["id"])
-	if id > 0 {
-		t, _ := template.ParseFiles("templates/note.html")
-		t.Execute(w, notes[id])
-	} else {
-		t, _ := template.ParseFiles("templates/notes.html")
-		t.Execute(w, notes)
-	}
-}
-
 func BlogHandler(w http.ResponseWriter, r *http.Request) {
 	path, _ := getRoutePath(r)
 	log.Print("BlogHandler:", path)
@@ -94,11 +64,12 @@ func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	r := mux.NewRouter()
+	r.StrictSlash(true)
+
 	r.HandleFunc("/", PageHandler)
 
-	n := r.PathPrefix("/notes").Subrouter()
-	n.HandleFunc("/", NotesHandler)
-	n.HandleFunc("/{id:[0-9]+}", NotesHandler)
+	r.HandleFunc("/notes", note.GetNotes)
+	r.HandleFunc("/notes/{id:[0-9]+}", note.GetNote)
 
 	b := r.PathPrefix("/blog").Subrouter()
 	b.HandleFunc("", BlogHandler)
