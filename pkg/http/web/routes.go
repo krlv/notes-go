@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
-	"github.com/krlv/goweb/storage"
+	"github.com/krlv/goweb/pkg/storage"
 )
 
 // DB is a page repository
