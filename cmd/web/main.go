@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/krlv/goweb/web"
+	"github.com/krlv/goweb/pkg/http/web"
 )
 
 const (

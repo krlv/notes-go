@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"github.com/icrowley/fake"
-	"github.com/krlv/goweb/blog"
-	"github.com/krlv/goweb/note"
+	"github.com/krlv/goweb/pkg/blog"
+	"github.com/krlv/goweb/pkg/note"
 )
 
 // MemoryStorage repository
