@@ -24,7 +24,7 @@ func NotFound(w http.ResponseWriter, r *http.Request) {
 	log.Print("NotFoundHandler:", r.RequestURI)
 	path := strings.TrimLeft(r.RequestURI, "/")
 
-	t, _ := template.ParseFiles("templates/404.html")
+	t, _ := template.ParseFiles("web/template/404.html")
 	t.Execute(w, map[string]interface{}{"Path": path})
 }
 
@@ -37,7 +37,7 @@ func StaticPage(w http.ResponseWriter, r *http.Request) {
 		path = "home"
 	}
 
-	fileName := "public/" + path + ".html"
+	fileName := "web/static/" + path + ".html"
 
 	http.ServeFile(w, r, fileName)
 }
@@ -46,7 +46,7 @@ func StaticPage(w http.ResponseWriter, r *http.Request) {
 func GetPages(w http.ResponseWriter, r *http.Request) {
 	pages := db.FindPages()
 
-	t, err := template.ParseFiles("templates/blog.html")
+	t, err := template.ParseFiles("web/template/blog.html")
 	if err != nil {
 		// TODO handle
 	}
@@ -63,7 +63,7 @@ func GetPageBySlug(w http.ResponseWriter, r *http.Request) {
 		// TODO handle
 	}
 
-	t, err := template.ParseFiles("templates/post.html")
+	t, err := template.ParseFiles("web/template/post.html")
 	if err != nil {
 		// TODO handle
 	}
@@ -73,7 +73,7 @@ func GetPageBySlug(w http.ResponseWriter, r *http.Request) {
 
 // GetNotes returns list of notes from data storage
 func GetNotes(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("templates/notes.html")
+	t, err := template.ParseFiles("web/template/notes.html")
 	if err != nil {
 		// TODO handle
 	}
@@ -96,7 +96,7 @@ func GetNote(w http.ResponseWriter, r *http.Request) {
 		// TODO handle
 	}
 
-	t, err := template.ParseFiles("templates/note.html")
+	t, err := template.ParseFiles("web/template/note.html")
 	if err != nil {
 		// TODO handle
 	}
