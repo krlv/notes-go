@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"errors"
 	"math/rand"
 	"strconv"
 
@@ -8,6 +9,9 @@ import (
 	"github.com/krlv/goweb/pkg/blog"
 	"github.com/krlv/goweb/pkg/note"
 )
+
+// ErrNotFound is returned when object not found
+var ErrNotFound = errors.New("storage: no objects in result set")
 
 // MemoryStorage repository
 type MemoryStorage struct {
@@ -57,8 +61,8 @@ func NewStorage() *MemoryStorage {
 func (s *MemoryStorage) FindPages() []*blog.Page {
 	pages := make([]*blog.Page, 0, len(s.pages))
 
-	for _, page := range s.pages {
-		pages = append(pages, page)
+	for _, p := range s.pages {
+		pages = append(pages, p)
 	}
 
 	return pages
@@ -66,15 +70,20 @@ func (s *MemoryStorage) FindPages() []*blog.Page {
 
 // GetPageBySlug returns page by it's slug
 func (s *MemoryStorage) GetPageBySlug(slug string) (*blog.Page, error) {
-	return s.pages[slug], nil
+	p, ok := s.pages[slug]
+	if !ok {
+		return nil, ErrNotFound
+	}
+
+	return p, nil
 }
 
 // FindNotes returns notes from memory repository
 func (s *MemoryStorage) FindNotes() []*note.Note {
 	notes := make([]*note.Note, 0, len(s.notes))
 
-	for _, page := range s.notes {
-		notes = append(notes, page)
+	for _, n := range s.notes {
+		notes = append(notes, n)
 	}
 
 	return notes
@@ -82,5 +91,10 @@ func (s *MemoryStorage) FindNotes() []*note.Note {
 
 // GetNoteByID returns note by ID or error if note not found in memory repo
 func (s *MemoryStorage) GetNoteByID(id int) (*note.Note, error) {
-	return s.notes[id], nil
+	n, ok := s.notes[id]
+	if !ok {
+		return nil, ErrNotFound
+	}
+
+	return n, nil
 }
