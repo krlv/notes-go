@@ -43,8 +43,8 @@ func NewStorage() *MemoryStorage {
 			tags[j] = fake.Word()
 		}
 
-		notes[i] = &note.Note{
-			ID:    i,
+		notes[i+1] = &note.Note{
+			ID:    i + 1,
 			Title: fake.Sentence(),
 			Body:  fake.Paragraphs(),
 			Tags:  tags,
