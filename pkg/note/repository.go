@@ -7,4 +7,7 @@ type Repository interface {
 
 	// GetNoteByID returns note by ID or error if note not found
 	GetNoteByID(int) (*Note, error)
+
+	// AddNote creates new note and returns it's ID
+	AddNote(title, body string) (int, error)
 }

@@ -17,8 +17,9 @@ func main() {
 
 	r.HandleFunc("/", web.StaticPage)
 
-	r.HandleFunc("/notes", web.GetNotes)
-	r.HandleFunc("/notes/{id:[0-9]+}", web.GetNote)
+	r.HandleFunc("/notes", web.GetNotes).Methods("GET")
+	r.HandleFunc("/notes", web.CreateNote).Methods("POST")
+	r.HandleFunc("/notes/{id:[0-9]+}", web.GetNote).Methods("GET")
 
 	r.HandleFunc("/blog", web.GetPages)
 	r.HandleFunc("/blog/{slug}", web.GetPageBySlug)

@@ -6,6 +6,14 @@
 </head>
 <body>
 <h1>Notes</h1>
+<p>New note:</p>
+<form action="/notes" method="post">
+    <label for="title">Title:</label><br />
+    <input type="text" id="title" name="title"><br />
+    <label for="note">Note:</label><br />
+    <textarea id="note" name="note"></textarea><br />
+    <input type="submit" value="Submit">
+</form>
 <ul>
     {{range .}}
         <li><a href="/notes/{{.ID}}">{{.Title}}</a></li>
