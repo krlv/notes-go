@@ -13,4 +13,7 @@ type Repository interface {
 
 	// UpdateNote updates existing note with passed title and body
 	UpdateNote(id int, title string, body string) error
+
+	// DeleteNote remove existing notw by ID
+	DeleteNote(id int) error
 }

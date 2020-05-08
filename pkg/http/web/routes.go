@@ -146,3 +146,18 @@ func UpdateNote(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/notes/"+strconv.Itoa(id), http.StatusFound)
 }
+
+// DeleteNote deletes note and redirects to the note list page
+func DeleteNote(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		// TODO handle
+	}
+
+	err = db.DeleteNote(id)
+	if err != nil {
+		// TODO show error page
+	}
+
+	http.Redirect(w, r, "/notes", http.StatusFound)
+}

@@ -123,3 +123,11 @@ func (s *MemoryStorage) UpdateNote(id int, title string, body string) error {
 
 	return nil
 }
+
+// DeleteNote removes note by id
+func (s *MemoryStorage) DeleteNote(id int) error {
+	// TODO handle not found error
+	delete(s.notes, id)
+
+	return nil
+}
