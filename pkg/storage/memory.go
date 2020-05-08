@@ -112,3 +112,14 @@ func (s *MemoryStorage) AddNote(title, body string) (int, error) {
 
 	return id, nil
 }
+
+// UpdateNote creates new note and returns it's ID
+func (s *MemoryStorage) UpdateNote(id int, title string, body string) error {
+	// TODO handle not found error
+	n := s.notes[id]
+
+	n.Title = title
+	n.Body = body
+
+	return nil
+}

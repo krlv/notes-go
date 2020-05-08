@@ -128,3 +128,21 @@ func GetNote(w http.ResponseWriter, r *http.Request) {
 		// TODO handle
 	}
 }
+
+// UpdateNote updates note with submitted data and redirect to the note view page
+func UpdateNote(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		// TODO handle
+	}
+
+	title := r.FormValue("title")
+	body := r.FormValue("note")
+
+	err = db.UpdateNote(id, title, body)
+	if err != nil {
+		// TODO show error page
+	}
+
+	http.Redirect(w, r, "/notes/"+strconv.Itoa(id), http.StatusFound)
+}

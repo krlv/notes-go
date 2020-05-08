@@ -10,4 +10,7 @@ type Repository interface {
 
 	// AddNote creates new note and returns it's ID
 	AddNote(title, body string) (int, error)
+
+	// UpdateNote updates existing note with passed title and body
+	UpdateNote(id int, title string, body string) error
 }

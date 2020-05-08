@@ -239,3 +239,45 @@ func TestMemoryStorage_AddNote(t *testing.T) {
 		})
 	}
 }
+
+func TestMemoryStorage_UpdateNote(t *testing.T) {
+	notes := make(map[int]*note.Note, 2)
+
+	for i := 0; i < 2; i++ {
+		notes[i] = &note.Note{ID: i, Title: fmt.Sprintf("test note %d", i)}
+	}
+
+	type fields struct {
+		pages map[string]*blog.Page
+		notes map[int]*note.Note
+	}
+	type args struct {
+		id    int
+		title string
+		body  string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr error
+	}{
+		{
+			name:    "update existing note by ID",
+			fields:  fields{notes: notes},
+			args:    args{id: 1, title: "updated note title 1", body: "updated note body 1"},
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &MemoryStorage{
+				pages: tt.fields.pages,
+				notes: tt.fields.notes,
+			}
+			if err := s.UpdateNote(tt.args.id, tt.args.title, tt.args.body); err != tt.wantErr {
+				t.Errorf("UpdateNote() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
