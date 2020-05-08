@@ -192,3 +192,148 @@ func TestNewStorage(t *testing.T) {
 		t.Errorf("NewStorage() notes count %v, want %v", got, 3)
 	}
 }
+
+func TestMemoryStorage_AddNote(t *testing.T) {
+	notes := make(map[int]*note.Note, 2)
+
+	for i := 0; i < 2; i++ {
+		notes[i] = &note.Note{ID: i, Title: fmt.Sprintf("test note %d", i)}
+	}
+
+	type fields struct {
+		pages map[string]*blog.Page
+		notes map[int]*note.Note
+	}
+	type args struct {
+		title string
+		body  string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    int
+		wantErr bool
+	}{
+		{
+			name:   "add new note with next ID",
+			fields: fields{notes: notes},
+			args:   args{title: "title note 3", body: "body note 3"},
+			want:   3,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &MemoryStorage{
+				pages: tt.fields.pages,
+				notes: tt.fields.notes,
+			}
+			got, err := s.AddNote(tt.args.title, tt.args.body)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("AddNote() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("AddNote() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMemoryStorage_UpdateNote(t *testing.T) {
+	notes := make(map[int]*note.Note, 2)
+
+	for i := 0; i < 2; i++ {
+		notes[i] = &note.Note{ID: i, Title: fmt.Sprintf("test note %d", i)}
+	}
+
+	type fields struct {
+		pages map[string]*blog.Page
+		notes map[int]*note.Note
+	}
+	type args struct {
+		id    int
+		title string
+		body  string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr error
+	}{
+		{
+			name:    "update existing note by ID",
+			fields:  fields{notes: notes},
+			args:    args{id: 1, title: "updated note title 1", body: "updated note body 1"},
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &MemoryStorage{
+				pages: tt.fields.pages,
+				notes: tt.fields.notes,
+			}
+			if err := s.UpdateNote(tt.args.id, tt.args.title, tt.args.body); err != tt.wantErr {
+				t.Errorf("UpdateNote() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestMemoryStorage_DeleteNote(t *testing.T) {
+	notes := make(map[int]*note.Note, 2)
+
+	for i := 0; i < 2; i++ {
+		notes[i] = &note.Note{ID: i, Title: fmt.Sprintf("test note %d", i)}
+	}
+
+	type fields struct {
+		pages map[string]*blog.Page
+		notes map[int]*note.Note
+	}
+	type args struct {
+		id int
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    int
+		wantErr error
+	}{
+		{
+			name:    "remove the first note",
+			fields:  fields{notes: notes},
+			args:    args{id: 0},
+			want:    1,
+			wantErr: nil,
+		},
+		{
+			name:    "remove the last note",
+			fields:  fields{notes: notes},
+			args:    args{id: 1},
+			want:    0,
+			wantErr: nil,
+		},
+		// TODO add error case test
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &MemoryStorage{
+				pages: tt.fields.pages,
+				notes: tt.fields.notes,
+			}
+			err := s.DeleteNote(tt.args.id)
+			got := len(s.notes)
+			if err != tt.wantErr {
+				t.Errorf("DeleteNote() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("DeleteNote() len got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

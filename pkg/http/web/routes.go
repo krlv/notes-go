@@ -25,7 +25,10 @@ func NotFound(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimLeft(r.RequestURI, "/")
 
 	t, _ := template.ParseFiles("web/template/404.html")
-	t.Execute(w, map[string]interface{}{"Path": path})
+	err := t.Execute(w, map[string]interface{}{"Path": path})
+	if err != nil {
+		// TODO handle
+	}
 }
 
 // StaticPage renders static pages
@@ -51,7 +54,10 @@ func GetPages(w http.ResponseWriter, r *http.Request) {
 		// TODO handle
 	}
 
-	t.Execute(w, pages)
+	err = t.Execute(w, pages)
+	if err != nil {
+		// TODO handle
+	}
 }
 
 // GetPageBySlug returns a single page by it's slug
@@ -68,7 +74,10 @@ func GetPageBySlug(w http.ResponseWriter, r *http.Request) {
 		// TODO handle
 	}
 
-	t.Execute(w, p)
+	err = t.Execute(w, p)
+	if err != nil {
+		// TODO handle
+	}
 }
 
 // GetNotes returns list of notes from data storage
@@ -82,6 +91,19 @@ func GetNotes(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// TODO handle
 	}
+}
+
+// CreateNote creates new note from submitted data and redirect to the note view page
+func CreateNote(w http.ResponseWriter, r *http.Request) {
+	title := r.FormValue("title")
+	body := r.FormValue("note")
+
+	id, err := db.AddNote(title, body)
+	if err != nil {
+		// TODO show error page
+	}
+
+	http.Redirect(w, r, "/notes/"+strconv.Itoa(id), http.StatusFound)
 }
 
 // GetNote returns a single note by note ID
@@ -101,5 +123,41 @@ func GetNote(w http.ResponseWriter, r *http.Request) {
 		// TODO handle
 	}
 
-	t.Execute(w, n)
+	err = t.Execute(w, n)
+	if err != nil {
+		// TODO handle
+	}
+}
+
+// UpdateNote updates note with submitted data and redirect to the note view page
+func UpdateNote(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		// TODO handle
+	}
+
+	title := r.FormValue("title")
+	body := r.FormValue("note")
+
+	err = db.UpdateNote(id, title, body)
+	if err != nil {
+		// TODO show error page
+	}
+
+	http.Redirect(w, r, "/notes/"+strconv.Itoa(id), http.StatusFound)
+}
+
+// DeleteNote deletes note and redirects to the note list page
+func DeleteNote(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		// TODO handle
+	}
+
+	err = db.DeleteNote(id)
+	if err != nil {
+		// TODO show error page
+	}
+
+	http.Redirect(w, r, "/notes", http.StatusFound)
 }

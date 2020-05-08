@@ -23,7 +23,7 @@ type MemoryStorage struct {
 func NewStorage() *MemoryStorage {
 	maxPages := 3
 
-	pages := make(map[string]*blog.Page, maxPages)
+	pages := make(map[string]*blog.Page)
 	for i := 0; i < maxPages; i++ {
 		slug := "slug-" + strconv.Itoa(i+1)
 
@@ -36,15 +36,15 @@ func NewStorage() *MemoryStorage {
 	}
 
 	maxNotes, maxTags := 2, 3
-	notes := make(map[int]*note.Note, maxNotes)
+	notes := make(map[int]*note.Note)
 	for i := 0; i < maxNotes; i++ {
 		tags := make([]string, rand.Intn(maxTags))
 		for j := 0; j < cap(tags); j++ {
 			tags[j] = fake.Word()
 		}
 
-		notes[i] = &note.Note{
-			ID:    i,
+		notes[i+1] = &note.Note{
+			ID:    i + 1,
 			Title: fake.Sentence(),
 			Body:  fake.Paragraphs(),
 			Tags:  tags,
@@ -97,4 +97,37 @@ func (s *MemoryStorage) GetNoteByID(id int) (*note.Note, error) {
 	}
 
 	return n, nil
+}
+
+// AddNote creates new note and returns it's ID
+func (s *MemoryStorage) AddNote(title, body string) (int, error) {
+	// TODO create proper ID generation
+	id := len(s.notes) + 1
+
+	s.notes[id] = &note.Note{
+		ID:    id,
+		Title: title,
+		Body:  body,
+	}
+
+	return id, nil
+}
+
+// UpdateNote creates new note and returns it's ID
+func (s *MemoryStorage) UpdateNote(id int, title string, body string) error {
+	// TODO handle not found error
+	n := s.notes[id]
+
+	n.Title = title
+	n.Body = body
+
+	return nil
+}
+
+// DeleteNote removes note by id
+func (s *MemoryStorage) DeleteNote(id int) error {
+	// TODO handle not found error
+	delete(s.notes, id)
+
+	return nil
 }
