@@ -81,27 +81,29 @@ func (s *MemoryStorage) GetPageBySlug(slug string) (*blog.Page, error) {
 }
 
 // FindNotes returns notes from memory repository
-func (s *MemoryStorage) FindNotes() []*note.Note {
-	notes := make([]*note.Note, 0, len(s.notes))
+func (s *MemoryStorage) FindNotes() []note.Note {
+	notes := make([]note.Note, 0, len(s.notes))
 
 	for _, n := range s.notes {
-		notes = append(notes, n)
+		notes = append(notes, *n)
 	}
 
 	return notes
 }
 
 // GetNoteByID returns note by ID or error if note not found in memory repo
-func (s *MemoryStorage) GetNoteByID(id int) (*note.Note, error) {
+func (s *MemoryStorage) GetNoteByID(id int) (note.Note, error) {
+	var n note.Note
+
 	s.RLock()
-	n, ok := s.notes[id]
+	np, ok := s.notes[id]
 	s.RUnlock()
 
 	if !ok {
-		return nil, ErrNotFound
+		return n, ErrNotFound
 	}
 
-	return n, nil
+	return *np, nil
 }
 
 // AddNote creates new note and returns it's ID
@@ -125,9 +127,12 @@ func (s *MemoryStorage) AddNote(title, body string) (int, error) {
 // UpdateNote creates new note and returns it's ID
 func (s *MemoryStorage) UpdateNote(id int, title string, body string) error {
 	s.Lock()
-	// TODO handle not found error
-	n := s.notes[id]
+	n, ok := s.notes[id]
 	s.Unlock()
+
+	if !ok {
+		return ErrNotFound
+	}
 
 	n.Title = title
 	n.Body = body
@@ -136,11 +141,8 @@ func (s *MemoryStorage) UpdateNote(id int, title string, body string) error {
 }
 
 // DeleteNote removes note by id
-func (s *MemoryStorage) DeleteNote(id int) error {
+func (s *MemoryStorage) DeleteNote(id int) {
 	s.Lock()
-	// TODO handle not found error
 	delete(s.notes, id)
 	s.Unlock()
-
-	return nil
 }
