@@ -4,6 +4,7 @@ import (
 	"errors"
 	"math/rand"
 	"strconv"
+	"sync"
 
 	"github.com/icrowley/fake"
 	"github.com/krlv/goweb/pkg/blog"
@@ -15,6 +16,7 @@ var ErrNotFound = errors.New("storage: no objects in result set")
 
 // MemoryStorage repository
 type MemoryStorage struct {
+	sync.RWMutex
 	pages map[string]*blog.Page
 	notes map[int]*note.Note
 }
@@ -91,7 +93,10 @@ func (s *MemoryStorage) FindNotes() []*note.Note {
 
 // GetNoteByID returns note by ID or error if note not found in memory repo
 func (s *MemoryStorage) GetNoteByID(id int) (*note.Note, error) {
+	s.RLock()
 	n, ok := s.notes[id]
+	s.RUnlock()
+
 	if !ok {
 		return nil, ErrNotFound
 	}
@@ -101,6 +106,8 @@ func (s *MemoryStorage) GetNoteByID(id int) (*note.Note, error) {
 
 // AddNote creates new note and returns it's ID
 func (s *MemoryStorage) AddNote(title, body string) (int, error) {
+	s.Lock()
+
 	// TODO create proper ID generation
 	id := len(s.notes) + 1
 
@@ -110,13 +117,17 @@ func (s *MemoryStorage) AddNote(title, body string) (int, error) {
 		Body:  body,
 	}
 
+	s.Unlock()
+
 	return id, nil
 }
 
 // UpdateNote creates new note and returns it's ID
 func (s *MemoryStorage) UpdateNote(id int, title string, body string) error {
+	s.Lock()
 	// TODO handle not found error
 	n := s.notes[id]
+	s.Unlock()
 
 	n.Title = title
 	n.Body = body
@@ -126,8 +137,10 @@ func (s *MemoryStorage) UpdateNote(id int, title string, body string) error {
 
 // DeleteNote removes note by id
 func (s *MemoryStorage) DeleteNote(id int) error {
+	s.Lock()
 	// TODO handle not found error
 	delete(s.notes, id)
+	s.Unlock()
 
 	return nil
 }
