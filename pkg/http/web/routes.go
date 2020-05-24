@@ -27,7 +27,7 @@ func NotFound(w http.ResponseWriter, r *http.Request) {
 	t, _ := template.ParseFiles("web/template/404.html")
 	err := t.Execute(w, map[string]interface{}{"Path": path})
 	if err != nil {
-		// TODO handle
+		panic(err)
 	}
 }
 
@@ -51,12 +51,12 @@ func GetPages(w http.ResponseWriter, r *http.Request) {
 
 	t, err := template.ParseFiles("web/template/blog.html")
 	if err != nil {
-		// TODO handle
+		panic(err)
 	}
 
 	err = t.Execute(w, pages)
 	if err != nil {
-		// TODO handle
+		panic(err)
 	}
 }
 
@@ -66,17 +66,18 @@ func GetPageBySlug(w http.ResponseWriter, r *http.Request) {
 
 	p, err := db.GetPageBySlug(slug)
 	if err != nil {
-		// TODO handle
+		http.Error(w, "Page not found.", http.StatusNotFound)
+		return
 	}
 
 	t, err := template.ParseFiles("web/template/post.html")
 	if err != nil {
-		// TODO handle
+		panic(err)
 	}
 
 	err = t.Execute(w, p)
 	if err != nil {
-		// TODO handle
+		panic(err)
 	}
 }
 
@@ -84,12 +85,12 @@ func GetPageBySlug(w http.ResponseWriter, r *http.Request) {
 func GetNotes(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("web/template/notes.html")
 	if err != nil {
-		// TODO handle
+		panic(err)
 	}
 
 	err = t.Execute(w, db.FindNotes())
 	if err != nil {
-		// TODO handle
+		panic(err)
 	}
 }
 
@@ -100,7 +101,8 @@ func CreateNote(w http.ResponseWriter, r *http.Request) {
 
 	id, err := db.AddNote(title, body)
 	if err != nil {
-		// TODO show error page
+		http.Error(w, "Whoops! Something went wrong.", http.StatusInternalServerError)
+		return
 	}
 
 	http.Redirect(w, r, "/notes/"+strconv.Itoa(id), http.StatusFound)
@@ -110,22 +112,24 @@ func CreateNote(w http.ResponseWriter, r *http.Request) {
 func GetNote(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(mux.Vars(r)["id"])
 	if err != nil {
-		// TODO handle
+		http.Error(w, "Invalid note ID.", http.StatusBadRequest)
+		return
 	}
 
 	n, err := db.GetNoteByID(id)
 	if err != nil {
-		// TODO handle
+		http.Error(w, "Note not found.", http.StatusNotFound)
+		return
 	}
 
 	t, err := template.ParseFiles("web/template/note.html")
 	if err != nil {
-		// TODO handle
+		panic(err)
 	}
 
 	err = t.Execute(w, n)
 	if err != nil {
-		// TODO handle
+		panic(err)
 	}
 }
 
@@ -133,7 +137,8 @@ func GetNote(w http.ResponseWriter, r *http.Request) {
 func UpdateNote(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(mux.Vars(r)["id"])
 	if err != nil {
-		// TODO handle
+		http.Error(w, "Invalid note ID.", http.StatusBadRequest)
+		return
 	}
 
 	title := r.FormValue("title")
@@ -141,7 +146,8 @@ func UpdateNote(w http.ResponseWriter, r *http.Request) {
 
 	err = db.UpdateNote(id, title, body)
 	if err != nil {
-		// TODO show error page
+		http.Error(w, "Note not found.", http.StatusNotFound)
+		return
 	}
 
 	http.Redirect(w, r, "/notes/"+strconv.Itoa(id), http.StatusFound)
@@ -151,12 +157,14 @@ func UpdateNote(w http.ResponseWriter, r *http.Request) {
 func DeleteNote(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(mux.Vars(r)["id"])
 	if err != nil {
-		// TODO handle
+		http.Error(w, "Invalid note ID.", http.StatusBadRequest)
+		return
 	}
 
 	err = db.DeleteNote(id)
 	if err != nil {
-		// TODO show error page
+		http.Error(w, "Note not found.", http.StatusNotFound)
+		return
 	}
 
 	http.Redirect(w, r, "/notes", http.StatusFound)

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -36,6 +37,5 @@ func main() {
 
 	r.NotFoundHandler = http.HandlerFunc(web.NotFound)
 
-	http.Handle("/", r)
-	http.ListenAndServe(Port, nil)
+	log.Fatal(http.ListenAndServe(Port, r))
 }

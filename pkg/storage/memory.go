@@ -127,9 +127,9 @@ func (s *MemoryStorage) AddNote(title, body string) (int, error) {
 // UpdateNote creates new note and returns it's ID
 func (s *MemoryStorage) UpdateNote(id int, title string, body string) error {
 	s.Lock()
-	n, ok := s.notes[id]
-	s.Unlock()
+	defer s.Unlock()
 
+	n, ok := s.notes[id]
 	if !ok {
 		return ErrNotFound
 	}
@@ -141,8 +141,15 @@ func (s *MemoryStorage) UpdateNote(id int, title string, body string) error {
 }
 
 // DeleteNote removes note by id
-func (s *MemoryStorage) DeleteNote(id int) {
+func (s *MemoryStorage) DeleteNote(id int) error {
 	s.Lock()
+	defer s.Unlock()
+
+	if _, ok := s.notes[id]; !ok {
+		return ErrNotFound
+	}
+
 	delete(s.notes, id)
-	s.Unlock()
+
+	return nil
 }
