@@ -11,7 +11,7 @@ import (
 
 func TestMemoryStorage_FindNotes(t *testing.T) {
 	t.Run("return empty notes result set for empty storage", func(t *testing.T) {
-		want := make([]*note.Note, 0)
+		want := make([]note.Note, 0)
 		s := &MemoryStorage{}
 
 		if got := s.FindNotes(); !reflect.DeepEqual(got, want) {
@@ -21,11 +21,11 @@ func TestMemoryStorage_FindNotes(t *testing.T) {
 
 	t.Run("return list of notes from storage", func(t *testing.T) {
 		notes := make(map[int]*note.Note, 3)
-		want := make([]*note.Note, 3)
+		want := make([]note.Note, 3)
 
 		for i := 0; i < 3; i++ {
 			n := &note.Note{ID: i, Title: fmt.Sprintf("test note %d", i)}
-			notes[i], want[i] = n, n
+			notes[i], want[i] = n, *n
 		}
 
 		s := &MemoryStorage{notes: notes}
@@ -46,7 +46,7 @@ func TestMemoryStorage_FindPages(t *testing.T) {
 		}
 	})
 
-	t.Run("return list of notes from storage", func(t *testing.T) {
+	t.Run("return list of pages from storage", func(t *testing.T) {
 		pages := make(map[string]*blog.Page, 3)
 		want := make([]*blog.Page, 3)
 
@@ -82,20 +82,20 @@ func TestMemoryStorage_GetNoteByID(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    *note.Note
+		want    note.Note
 		wantErr error
 	}{
 		{
 			name:   "return first note",
 			fields: fields{notes: notes},
 			args:   args{id: 0},
-			want:   notes[0],
+			want:   *notes[0],
 		},
 		{
 			name:   "return second note",
 			fields: fields{notes: notes},
 			args:   args{id: 1},
-			want:   notes[1],
+			want:   *notes[1],
 		},
 		{
 			name:    "return note not found error",
@@ -268,6 +268,12 @@ func TestMemoryStorage_UpdateNote(t *testing.T) {
 			args:    args{id: 1, title: "updated note title 1", body: "updated note body 1"},
 			wantErr: nil,
 		},
+		{
+			name:    "update note that doesn't exist",
+			fields:  fields{notes: notes},
+			args:    args{id: 100},
+			wantErr: ErrNotFound,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -297,27 +303,29 @@ func TestMemoryStorage_DeleteNote(t *testing.T) {
 		id int
 	}
 	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    int
-		wantErr error
+		name   string
+		fields fields
+		args   args
+		want   int
 	}{
 		{
-			name:    "remove the first note",
-			fields:  fields{notes: notes},
-			args:    args{id: 0},
-			want:    1,
-			wantErr: nil,
+			name:   "remove note that doesn't exist",
+			fields: fields{notes: notes},
+			args:   args{id: 100},
+			want:   2,
 		},
 		{
-			name:    "remove the last note",
-			fields:  fields{notes: notes},
-			args:    args{id: 1},
-			want:    0,
-			wantErr: nil,
+			name:   "remove the first note",
+			fields: fields{notes: notes},
+			args:   args{id: 0},
+			want:   1,
 		},
-		// TODO add error case test
+		{
+			name:   "remove the last note",
+			fields: fields{notes: notes},
+			args:   args{id: 1},
+			want:   0,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -325,12 +333,9 @@ func TestMemoryStorage_DeleteNote(t *testing.T) {
 				pages: tt.fields.pages,
 				notes: tt.fields.notes,
 			}
-			err := s.DeleteNote(tt.args.id)
+
+			s.DeleteNote(tt.args.id)
 			got := len(s.notes)
-			if err != tt.wantErr {
-				t.Errorf("DeleteNote() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
 			if got != tt.want {
 				t.Errorf("DeleteNote() len got = %v, want %v", got, tt.want)
 			}

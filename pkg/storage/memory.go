@@ -4,6 +4,7 @@ import (
 	"errors"
 	"math/rand"
 	"strconv"
+	"sync"
 
 	"github.com/icrowley/fake"
 	"github.com/krlv/goweb/pkg/blog"
@@ -15,6 +16,7 @@ var ErrNotFound = errors.New("storage: no objects in result set")
 
 // MemoryStorage repository
 type MemoryStorage struct {
+	sync.RWMutex
 	pages map[string]*blog.Page
 	notes map[int]*note.Note
 }
@@ -79,28 +81,35 @@ func (s *MemoryStorage) GetPageBySlug(slug string) (*blog.Page, error) {
 }
 
 // FindNotes returns notes from memory repository
-func (s *MemoryStorage) FindNotes() []*note.Note {
-	notes := make([]*note.Note, 0, len(s.notes))
+func (s *MemoryStorage) FindNotes() []note.Note {
+	notes := make([]note.Note, 0, len(s.notes))
 
 	for _, n := range s.notes {
-		notes = append(notes, n)
+		notes = append(notes, *n)
 	}
 
 	return notes
 }
 
 // GetNoteByID returns note by ID or error if note not found in memory repo
-func (s *MemoryStorage) GetNoteByID(id int) (*note.Note, error) {
-	n, ok := s.notes[id]
+func (s *MemoryStorage) GetNoteByID(id int) (note.Note, error) {
+	var n note.Note
+
+	s.RLock()
+	np, ok := s.notes[id]
+	s.RUnlock()
+
 	if !ok {
-		return nil, ErrNotFound
+		return n, ErrNotFound
 	}
 
-	return n, nil
+	return *np, nil
 }
 
 // AddNote creates new note and returns it's ID
 func (s *MemoryStorage) AddNote(title, body string) (int, error) {
+	s.Lock()
+
 	// TODO create proper ID generation
 	id := len(s.notes) + 1
 
@@ -110,13 +119,20 @@ func (s *MemoryStorage) AddNote(title, body string) (int, error) {
 		Body:  body,
 	}
 
+	s.Unlock()
+
 	return id, nil
 }
 
 // UpdateNote creates new note and returns it's ID
 func (s *MemoryStorage) UpdateNote(id int, title string, body string) error {
-	// TODO handle not found error
-	n := s.notes[id]
+	s.Lock()
+	n, ok := s.notes[id]
+	s.Unlock()
+
+	if !ok {
+		return ErrNotFound
+	}
 
 	n.Title = title
 	n.Body = body
@@ -125,9 +141,8 @@ func (s *MemoryStorage) UpdateNote(id int, title string, body string) error {
 }
 
 // DeleteNote removes note by id
-func (s *MemoryStorage) DeleteNote(id int) error {
-	// TODO handle not found error
+func (s *MemoryStorage) DeleteNote(id int) {
+	s.Lock()
 	delete(s.notes, id)
-
-	return nil
+	s.Unlock()
 }
