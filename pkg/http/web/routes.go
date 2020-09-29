@@ -1,6 +1,7 @@
 package web
 
 import (
+	"errors"
 	"html/template"
 	"log"
 	"net/http"
@@ -22,13 +23,11 @@ func init() {
 // to registered routes (404 page)
 func NotFound(w http.ResponseWriter, r *http.Request) {
 	log.Print("NotFoundHandler:", r.RequestURI)
-	path := strings.TrimLeft(r.RequestURI, "/")
 
-	t, _ := template.ParseFiles("web/template/404.html")
-	err := t.Execute(w, map[string]interface{}{"Path": path})
-	if err != nil {
-		panic(err)
-	}
+	path := strings.TrimLeft(r.RequestURI, "/")
+	err := errors.New("handler not found for path " + path)
+
+	notFoundPage(err, w, r)
 }
 
 // StaticPage renders static pages
@@ -66,7 +65,7 @@ func GetPageBySlug(w http.ResponseWriter, r *http.Request) {
 
 	p, err := db.GetPageBySlug(slug)
 	if err != nil {
-		http.Error(w, "Page not found.", http.StatusNotFound)
+		notFoundPage(err, w, r)
 		return
 	}
 
@@ -101,7 +100,7 @@ func CreateNote(w http.ResponseWriter, r *http.Request) {
 
 	id, err := db.AddNote(title, body)
 	if err != nil {
-		http.Error(w, "Whoops! Something went wrong.", http.StatusInternalServerError)
+		errorPage(err, w, r)
 		return
 	}
 
@@ -118,7 +117,7 @@ func GetNote(w http.ResponseWriter, r *http.Request) {
 
 	n, err := db.GetNoteByID(id)
 	if err != nil {
-		http.Error(w, "Note not found.", http.StatusNotFound)
+		notFoundPage(err, w, r)
 		return
 	}
 
@@ -146,7 +145,7 @@ func UpdateNote(w http.ResponseWriter, r *http.Request) {
 
 	err = db.UpdateNote(id, title, body)
 	if err != nil {
-		http.Error(w, "Note not found.", http.StatusNotFound)
+		notFoundPage(err, w, r)
 		return
 	}
 
@@ -163,7 +162,7 @@ func DeleteNote(w http.ResponseWriter, r *http.Request) {
 
 	err = db.DeleteNote(id)
 	if err != nil {
-		http.Error(w, "Note not found.", http.StatusNotFound)
+		notFoundPage(err, w, r)
 		return
 	}
 
