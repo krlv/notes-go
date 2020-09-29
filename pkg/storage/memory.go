@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"errors"
 	"math/rand"
 	"strconv"
 	"sync"
@@ -10,9 +9,6 @@ import (
 	"github.com/krlv/goweb/pkg/blog"
 	"github.com/krlv/goweb/pkg/note"
 )
-
-// ErrNotFound is returned when object not found
-var ErrNotFound = errors.New("storage: no objects in result set")
 
 // MemoryStorage repository
 type MemoryStorage struct {
@@ -74,7 +70,7 @@ func (s *MemoryStorage) FindPages() []*blog.Page {
 func (s *MemoryStorage) GetPageBySlug(slug string) (*blog.Page, error) {
 	p, ok := s.pages[slug]
 	if !ok {
-		return nil, ErrNotFound
+		return nil, blog.ErrNotFound
 	}
 
 	return p, nil
@@ -100,7 +96,7 @@ func (s *MemoryStorage) GetNoteByID(id int) (note.Note, error) {
 	s.RUnlock()
 
 	if !ok {
-		return n, ErrNotFound
+		return n, note.ErrNotFound
 	}
 
 	return *np, nil
@@ -127,11 +123,11 @@ func (s *MemoryStorage) AddNote(title, body string) (int, error) {
 // UpdateNote creates new note and returns it's ID
 func (s *MemoryStorage) UpdateNote(id int, title string, body string) error {
 	s.Lock()
-	n, ok := s.notes[id]
-	s.Unlock()
+	defer s.Unlock()
 
+	n, ok := s.notes[id]
 	if !ok {
-		return ErrNotFound
+		return note.ErrNotFound
 	}
 
 	n.Title = title
@@ -141,8 +137,15 @@ func (s *MemoryStorage) UpdateNote(id int, title string, body string) error {
 }
 
 // DeleteNote removes note by id
-func (s *MemoryStorage) DeleteNote(id int) {
+func (s *MemoryStorage) DeleteNote(id int) error {
 	s.Lock()
+	defer s.Unlock()
+
+	if _, ok := s.notes[id]; !ok {
+		return note.ErrNotFound
+	}
+
 	delete(s.notes, id)
-	s.Unlock()
+
+	return nil
 }

@@ -101,7 +101,7 @@ func TestMemoryStorage_GetNoteByID(t *testing.T) {
 			name:    "return note not found error",
 			fields:  fields{notes: notes},
 			args:    args{id: 4},
-			wantErr: ErrNotFound,
+			wantErr: note.ErrNotFound,
 		},
 	}
 	for _, tt := range tests {
@@ -160,7 +160,7 @@ func TestMemoryStorage_GetPageBySlug(t *testing.T) {
 			name:    "return page not found error",
 			fields:  fields{pages: pages},
 			args:    args{slug: "page-not-found"},
-			wantErr: ErrNotFound,
+			wantErr: blog.ErrNotFound,
 		},
 	}
 	for _, tt := range tests {
@@ -272,7 +272,7 @@ func TestMemoryStorage_UpdateNote(t *testing.T) {
 			name:    "update note that doesn't exist",
 			fields:  fields{notes: notes},
 			args:    args{id: 100},
-			wantErr: ErrNotFound,
+			wantErr: note.ErrNotFound,
 		},
 	}
 	for _, tt := range tests {

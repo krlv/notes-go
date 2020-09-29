@@ -15,5 +15,5 @@ type Repository interface {
 	UpdateNote(id int, title string, body string) error
 
 	// DeleteNote remove existing notw by ID
-	DeleteNote(id int)
+	DeleteNote(id int) error
 }
