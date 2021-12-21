@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/krlv/goweb/pkg/storage"
+	"github.com/krlv/notes-go/pkg/storage"
 )
 
 // DB is a page repository

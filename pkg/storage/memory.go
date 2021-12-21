@@ -6,8 +6,8 @@ import (
 	"sync"
 
 	"github.com/icrowley/fake"
-	"github.com/krlv/goweb/pkg/blog"
-	"github.com/krlv/goweb/pkg/note"
+	"github.com/krlv/notes-go/pkg/blog"
+	"github.com/krlv/notes-go/pkg/note"
 )
 
 // MemoryStorage repository

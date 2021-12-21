@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/krlv/goweb/pkg/blog"
-	"github.com/krlv/goweb/pkg/note"
+	"github.com/krlv/notes-go/pkg/blog"
+	"github.com/krlv/notes-go/pkg/note"
 )
 
 func TestMemoryStorage_FindNotes(t *testing.T) {

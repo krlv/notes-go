@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/krlv/goweb/pkg/http/rest"
-	"github.com/krlv/goweb/pkg/http/web"
+	"github.com/krlv/notes-go/pkg/http/rest"
+	"github.com/krlv/notes-go/pkg/http/web"
 )
 
 const (
